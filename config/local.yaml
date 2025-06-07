@@ -1,0 +1,6 @@
+  env: "local"
+  storage: ""
+  token_ttl: 1h
+  grpc:
+    port: 44045
+    timeout: 5s
