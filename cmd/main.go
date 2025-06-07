@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -18,11 +20,15 @@ func main() {
 
 	application := app.NewApp(log, cfg.Port, "ss", cfg.Timeout)
 
-	err := application.Start()
-	if err != nil {
-		log.Debug("Failed to start application")
-	}
+	go application.MustStart()
 
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT)
+
+	<-stop
+
+	application.GracefulStop()
+	log.Info("Goodbye")
 	//TODO: инит app
 	//TODO: Grpc
 }

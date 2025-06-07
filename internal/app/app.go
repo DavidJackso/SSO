@@ -2,6 +2,7 @@ package app
 
 import (
 	grpcapp "SSO/internal/app/grpc"
+	"log"
 	"log/slog"
 	"time"
 )
@@ -23,10 +24,17 @@ func NewApp(log *slog.Logger, grpcPort int, storage string, tokenTTL time.Durati
 	}
 }
 
-func (a *App) Start() error {
+func (a *App) MustStart() {
 	err := a.gRPCServer.Run()
 	if err != nil {
-		a.log.Debug("Failed to start application", "error", err)
+		panic(err)
 	}
-	return err
+}
+
+func (a *App) GracefulStop() {
+	err := a.gRPCServer.Stop()
+	if err != nil {
+		log.Fatal(err)
+	}
+	a.log.Info("GRPC server gracefully stopped")
 }
