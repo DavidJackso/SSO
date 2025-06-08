@@ -2,6 +2,7 @@ package app
 
 import (
 	grpcapp "SSO/internal/app/grpc"
+	"SSO/internal/services/auth"
 	"log"
 	"log/slog"
 	"time"
@@ -16,8 +17,10 @@ func NewApp(log *slog.Logger, grpcPort int, storage string, tokenTTL time.Durati
 	//TODO:db
 	//TODO: init auth service
 
+	authService := auth.New(log)
+
 	grpcApp := grpcapp.NewApp(
-		log, grpcPort)
+		log, auth, grpcPort)
 	return &App{
 		gRPCServer: grpcApp,
 		log:        log,

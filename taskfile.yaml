@@ -1,0 +1,58 @@
+version: '3' # Эта строка в Taskfile - нормально, но удалите 'version:' из docker-compose.yml!
+
+vars:
+  PROJECT_NAME: sso
+  DB_USER: user
+  DB_PASSWORD: password
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_NAME: authdb
+  MIGRATIONS_PATH: /migrations # Путь к миграциям ВНУТРИ контейнера migrate
+
+tasks:
+  reset:
+    desc: Остановить и удалить все контейнеры, volume и сети проекта
+    cmds:
+      - docker compose -p {{.PROJECT_NAME}} down -v --remove-orphans
+
+  db-up:
+    desc: Поднять только базу данных
+    cmds:
+      - docker compose -p {{.PROJECT_NAME}} up -d postgres
+
+  migrate:
+    desc: Запустить миграции
+    cmds:
+      - echo "Ожидание готовности PostgreSQL (10 секунд)..."
+      - |
+        # Используем простой sleep.
+        if ! command -v sleep &> /dev/null; then
+          powershell -command "Start-Sleep -Seconds 10" # Для Windows
+        else
+          sleep 10 # Для Linux/macOS
+        fi
+      # --- ВАЖНОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+      # Мы явно указываем `docker compose run`, что нужно временно изменить
+      # ENTRYPOINT контейнера на `/bin/sh`.
+      # Затем передаем `-c` и саму команду миграции как строку для `/bin/sh`.
+      - >
+        docker compose -p {{.PROJECT_NAME}} run --rm --entrypoint /bin/sh migrate
+        -c
+        'migrate -path={{.MIGRATIONS_PATH}} -database="postgres://{{.DB_USER}}:{{.DB_PASSWORD}}@{{.DB_HOST}}:{{.DB_PORT}}/{{.DB_NAME}}?sslmode=disable" up'
+
+  rebuild:
+    desc: Полный цикл сброс, запуск БД, миграции
+    cmds:
+      - task: reset
+      - task: db-up
+      - task: migrate
+
+  logs:
+    desc: Показать логи всех сервисов
+    cmds:
+      - docker compose -p {{.PROJECT_NAME}} logs -f
+
+  ps:
+    desc: Показать статус контейнеров
+    cmds:
+      - docker compose -p {{.PROJECT_NAME}} ps

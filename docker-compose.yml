@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: auth-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: authdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  migrate:
+    image: migrate/migrate
+    depends_on:
+      - postgres
+    volumes:
+      - ./migrations:/migrations
+    entrypoint: /bin/sh
+    command: -c "
+      until pg_isready -h postgres -p 5432; do
+      echo waiting for postgres;
+      sleep 2;
+      done;
+      migrate -path=/migrations -database=postgres://user:password@postgres:5432/authdb?sslmode=disable up"
+
+volumes:
+  pgdata:
