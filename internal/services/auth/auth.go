@@ -55,7 +55,7 @@ func New(
 
 func (auth *Auth) Login(
 	ctx context.Context,
-	email, password string, appID int,
+	email, password string,
 ) (string, error) {
 	op := "auth.Login"
 
@@ -83,8 +83,8 @@ func (auth *Auth) Login(
 
 		return " ", fmt.Errorf("invalid password: %w", err)
 	}
-
-	app, err := auth.appProvider.App(ctx, appID)
+	//TODO:временная затычка
+	app, err := auth.appProvider.App(ctx, 1)
 	log.Info("successfully logged in")
 
 	token, err := jwt.NewToken(user, app, auth.tokenTTL)
@@ -121,7 +121,7 @@ func (auth *Auth) RegisterNewUser(
 			auth.log.Warn("user already exists")
 			return 0, fmt.Errorf("user already exists: %w", err)
 		}
-		log.Error("failed to save user")
+		log.Error("failed to save user", "error", err)
 		return 0, fmt.Errorf("failed to save user: %w", err)
 	}
 

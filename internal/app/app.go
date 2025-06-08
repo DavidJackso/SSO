@@ -2,10 +2,13 @@ package app
 
 import (
 	grpcapp "SSO/internal/app/grpc"
-	"SSO/internal/services/auth"
+	"SSO/internal/config"
+	authservice "SSO/internal/services/auth"
+	"SSO/internal/storage/pg"
+	"time"
+
 	"log"
 	"log/slog"
-	"time"
 )
 
 type App struct {
@@ -13,14 +16,22 @@ type App struct {
 	log        *slog.Logger
 }
 
-func NewApp(log *slog.Logger, grpcPort int, storage string, tokenTTL time.Duration) *App {
-	//TODO:db
-	//TODO: init auth service
+func NewApp(log *slog.Logger, tokenTTL time.Duration, db config.DBConfig, grpcConf config.GRPCConfig) *App {
+	storage, err := pg.New(log, db)
+	if err != nil {
+		log.Error("Failed to create storage", "error", err)
+	}
 
-	authService := auth.New(log)
+	authService := authservice.New(
+		log,
+		storage,
+		storage,
+		storage,
+		tokenTTL,
+	)
 
-	grpcApp := grpcapp.NewApp(
-		log, auth, grpcPort)
+	grpcApp := grpcapp.NewApp(log, authService, grpcConf.Port)
+
 	return &App{
 		gRPCServer: grpcApp,
 		log:        log,

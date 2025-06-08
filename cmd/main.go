@@ -18,7 +18,7 @@ func main() {
 
 	log.Info("Hello World")
 
-	application := app.NewApp(log, cfg.Port, "ss", cfg.Timeout)
+	application := app.NewApp(log, cfg.TokenTTL, cfg.DBConfig, cfg.GRPC)
 
 	go application.MustStart()
 
@@ -29,8 +29,6 @@ func main() {
 
 	application.GracefulStop()
 	log.Info("Goodbye")
-	//TODO: инит app
-	//TODO: Grpc
 }
 
 func SetupLogger(env string) *slog.Logger {

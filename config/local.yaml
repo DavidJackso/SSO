@@ -1,6 +1,15 @@
-  env: "local"
-  storage: ""
-  token_ttl: 1h
-  grpc:
+env: local
+storage: ""
+token_ttl: 1h
+
+grpc:
     port: 44045
     timeout: 5s
+
+db:
+    host: localhost
+    port: 5432
+    user: user
+    password: password
+    dbname: authdb
+
