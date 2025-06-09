@@ -50,7 +50,6 @@ func (s *serverApi) Login(
 
 	//TODO: implement login via service
 
-	return nil, nil
 }
 
 func (s *serverApi) Register(
