@@ -2,7 +2,7 @@ version: '3' # Эта строка в Taskfile - нормально, но уда
 
 vars:
   PROJECT_NAME: sso
-  DB_USER: user
+  DB_USER: postgres
   DB_PASSWORD: password
   DB_HOST: postgres
   DB_PORT: 5432
