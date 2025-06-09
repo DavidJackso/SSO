@@ -7,9 +7,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/lib/pq"
 	"log"
 	"log/slog"
+
+	"github.com/lib/pq"
 )
 
 type Storage struct {
@@ -19,9 +20,13 @@ type Storage struct {
 func New(log *slog.Logger, config config.DBConfig) (*Storage, error) {
 	const op = "storage.New"
 
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", config.User, config.Password, config.Database)
+	fmt.Printf("Connecting with: host=%s port=%d user=%s password=%s dbname=%s\n",
+		config.Host, config.Port, config.User, config.Password, config.Database)
 
-	log.Info("Connecting to PostgreSQL", op, connStr)
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		config.User, config.Password, config.Host, config.Port, config.Database)
+
+	log.Info("Connecting to PostgreSQL", "op", op, "connStr", connStr)
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {

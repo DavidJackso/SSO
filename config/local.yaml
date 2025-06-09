@@ -1,5 +1,4 @@
 env: local
-storage: ""
 token_ttl: 1h
 
 grpc:
@@ -8,8 +7,8 @@ grpc:
 
 db:
     host: localhost
-    port: 5432
-    user: user
+    port: 5433
+    user: postgres
     password: password
     dbname: authdb
 
